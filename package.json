@@ -1,0 +1,20 @@
+{
+    "name": "Express-API",
+    "description": "Mongo Flighttracker",
+    "version": "0.0.1",
+    "author": "Jeffrey Luppes",
+    "scripts": {
+        "start": "node ./bin/www"
+    },
+    "dependencies": {
+      "body-parser": "1.9.2",
+      "express": "4.10.1",
+      "mongodb": "~1.4.34",
+      "morgan": "1.5.0",
+      "cheerio": "^0.19.0",
+      "fs": "0.0.2",
+      "later": "^1.1.6",
+      "process": "^0.10.1",
+      "underscore": "^1.8.2"
+    }
+}
