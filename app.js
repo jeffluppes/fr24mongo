@@ -10,14 +10,19 @@ var result = {
     "features": []
 };
 
-var database = "mongodb://localhost:27017/flight24";
+var database = "mongodb://localhost:27017/planes";
 var collection = "planes";
 
 
-GetFlightData();
-setInterval(function () {
-  GetFlightData();
-}, 15000);
+MongoClient.connect(database, function(err, db) {
+    if(err) throw err;
+    console.log('connected to db');
+    GetFlightData(db);
+    setInterval(function () {
+      GetFlightData(db);
+    }, 15000);
+
+});
 
 function updateNameById(obj, id, value) {
     try  {
@@ -44,11 +49,15 @@ function updateNameById(obj, id, value) {
     }
 }
 
-function CheckFeature(f) {
+function CheckFeature(f,db) {
     updateNameById(result.features, f["properties"]["id"], f);
+
+    db.collection(collection).insert(f, function(err, inserted) {      });
+
+
 }
 
-function GetFlightData() {
+function GetFlightData(db) {
     var options = {
         host: 'lhr.data.fr24.com',
         path: '/zones/fcgi/feed.js?bounds=55.67283539294783,51.552131597019454,-1.5024902343745907,17.149658203125&faa=1&mlat=1&flarm=1&adsb=1&gnd=1&air=1&vehicles=1&estimated=1&maxage=900&gliders=1&stats=1&'
@@ -84,7 +93,8 @@ function GetFlightData() {
                             "Time": new Date().getTime()
                         }
                     };
-                    CheckFeature(sit);
+                    CheckFeature(sit,db);
+
                 }
             }
             var active = result;
@@ -95,24 +105,8 @@ function GetFlightData() {
             console.log(result.features.length);
             // ID to avoid having duplicate _id keys (still need to know why this happens)
             result._id = "Flightradar_" + new Date().getTime();
-            insertIntoDB(result);
+            //insertIntoDB(result);
 
         });
     }).end();
-}
-
-// Made a function to add data to Mongo. Featurecollections are stored as docs -
-// perhaps it's better to store features as docs instead.
-function insertIntoDB(r) {
-  MongoClient.connect(database, function(err, db) {
-      if(err) throw err;
-
-      db.collection(collection).insert(r, function(err, inserted) {
-          if(err) throw err;
-          // uncomment if you need the JSON printed to your terminal.
-          // console.dir("Successfully inserted: " + JSON.stringify(inserted));
-
-          return db.close();
-      });
-  });
 }
